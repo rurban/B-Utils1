@@ -5,8 +5,8 @@ $self = {
           'typemaps' => [
                           'typemap'
                         ],
-          'deps' => [],
-          'libs' => ''
+          'libs' => '',
+          'deps' => []
         };
 
 
