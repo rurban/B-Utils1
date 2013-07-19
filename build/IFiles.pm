@@ -1,12 +1,12 @@
 package B::Utils::Install::Files;
 
 $self = {
-          'inc' => '',
           'typemaps' => [
                           'typemap'
                         ],
-          'libs' => '',
-          'deps' => []
+          'inc' => '',
+          'deps' => [],
+          'libs' => ''
         };
 
 
