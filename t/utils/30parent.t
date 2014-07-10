@@ -1,4 +1,5 @@
 use B qw( OPf_KIDS );
+use Config ();
 my @empty_array = ();
 test_data() for @empty_array;
 
@@ -54,8 +55,14 @@ walkoptree_simple(
         my $op = shift;
 
         my $parent = eval { $op->parent };
-        if ( $$op == $$root ) {
-            is( $parent, undef, "No parent for root " . $op->stringify );
+        if ( $$op == $$root) {
+            # small discrepancy between core -DPERL_OP_PARENT returning B::NULL in this case
+            # and B::Utils::parent where this cannot happen
+            if ($] >= 5.021002 and $Config::Config{ccflags} =~ /-DPERL_OP_PARENT/) {
+              is( ref $parent, 'B::NULL', "No parent for root " . $op->stringify );
+            } else {
+              is( $parent, undef, "No parent for root " . $op->stringify );
+            }
         }
         else {
 
