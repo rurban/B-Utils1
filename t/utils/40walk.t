@@ -10,7 +10,7 @@ my $callback = sub
 {
   my $op = shift;
   if ('COP' eq B::class($op) and  $op->file eq __FILE__) {
-    push @lines, $op->line;
+    push @lines, $op->line unless $op->name eq 'null';
   }
 };
 
