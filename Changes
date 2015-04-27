@@ -1,5 +1,8 @@
 Revision history for Perl extension B::Utils.
 
+   - fix tests for perl 5.21.7 (change to nulled COPs) (RT#100508, Father
+     Chrysostomos)
+
 0.24
    - Export C symbols, breakage from 0.22
 
