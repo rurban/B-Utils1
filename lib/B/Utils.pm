@@ -3,7 +3,7 @@ package B::Utils;
 use 5.006;
 use strict;
 use warnings;
-use vars qw( $VERSION @EXPORT_OK %EXPORT_TAGS
+use vars qw( @EXPORT_OK %EXPORT_TAGS
     @bad_stashes $TRACE_FH $file $line $sub );
 
 use subs (
@@ -27,13 +27,7 @@ B::Utils - Helper functions for op tree manipulation
 # NOTE: The pod/code version here and in README are computer checked
 # by xt/version.t. Keep them in sync.
 
-=head1 VERSION
-
-0.26
-
-=cut
-
-$VERSION = '0.26';
+our $VERSION = '0.26';
 
 
 
