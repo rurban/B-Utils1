@@ -5,9 +5,10 @@ Revision history for Perl extension B::Utils.
      Chrysostomos)
 
 0.25
-   - Export C symbols, breakage from 0.22
+   - Re-expose symbols by setting dl_load_flags. Hope this is ok for HP-UX
 
 0.24
+   - Export C symbols, breakage from 0.22
 
 0.23
    - 5.10, 5.12, 5.14 compatibile syntax
