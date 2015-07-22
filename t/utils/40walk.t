@@ -1,7 +1,7 @@
 #!perl
 use Test::More;
-use lib '../../lib';
-use lib '../../blib/arch/auto/B/Utils';
+
+
 use B qw(class);
 use B::Utils qw( all_roots walkoptree_simple);
 
