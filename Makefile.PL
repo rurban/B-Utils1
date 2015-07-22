@@ -22,6 +22,7 @@ $pkg->add_pm( 'lib/B/Utils.pm' => '$(INST_LIB)/B/Utils.pm',
 
 $pkg->add_typemaps("typemap");
 
+mkdir 'build';
 $pkg->save_config('build/IFiles.pm');
 
 use ExtUtils::MakeMaker;

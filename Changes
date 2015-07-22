@@ -1,5 +1,8 @@
 Revision history for Perl extension B::Utils.
 
+   - remove build/IFiles.pm from the shipped dist, as it is meant to be
+     auto-generated at install time (was added in 0.26)
+
 0.26
    - fix tests for perl 5.21.7 (change to nulled COPs) (RT#100508, Father
      Chrysostomos)
