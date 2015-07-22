@@ -177,7 +177,7 @@ In the future, it may be possible to search for the parent before we
 have the C<next> pointers in place, but it'll take me a while to
 figure out how to do that.
 
-Warning: Since 5.21.2 B comes with it's own version of B::OP::parent
+Warning: Since 5.21.2 B comes with its own version of B::OP::parent
 which returns either B::NULL or the real parent when ccflags contains
 -DPERL_OP_PARENT.
 In this case rather use $op->_parent.
