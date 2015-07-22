@@ -35,7 +35,7 @@ WriteMakefile1(
         'Task::Weaken' => 0,
         'Exporter'     => 0,
     },
-    BUILD_REQUIRES => {
+    TEST_REQUIRES => {
         'Test::More' => 0,
     },
     CONFIGURE_REQUIRES => {
