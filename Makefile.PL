@@ -46,8 +46,16 @@ WriteMakefile1(
     LICENSE       => 'perl',
     MIN_PERL_VERSION => 5.006,
     META_MERGE => {
-      resources => {
-        repository => 'http://github.com/jbenjore/B-Utils/tree',
+      'meta-spec' => { version => 2 },
+      repository => {
+          # original in http://github.com/jbenjore/B-Utils/
+          url => 'https://github.com/karenetheridge/B-Utils.git',
+          web => 'https://github.com/karenetheridge/B-Utils',
+          type => 'git',
+      },
+      bugtracker => {
+          mailto => 'bug-B-Utils@rt.cpan.org',
+          web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=B-Utils',
       },
       keywords => ['op tree','perl internals'],
     },
