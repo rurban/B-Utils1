@@ -366,7 +366,7 @@ it to C<0> will limit the dump to the current op.
 
 C<attributes> is a list of attributes to include in the produced
 pattern. The attributes that can be checked against in this way
-are 
+are:
 
   name targ type seq flags private pmflags pmpermflags.
 
@@ -378,7 +378,7 @@ sub B::OP::as_opgrep_pattern {
 
   my $attribs = $opt->{attributes};
   $attribs ||= [qw(name flags)];
-  
+
   my $pattern = {};
   foreach my $attr (@$attribs) {
     $pattern->{$attr} = $op->$attr() if $op->can($attr);
@@ -797,13 +797,13 @@ of interest. Example:
     },
     $root_op
   );
-  
+
   if ($result) {
     my $name = $result->{notreached}->name; # result is *not* the root op
     carp("Statement unlikely to be reached (op name: $name)");
     carp("\t(Maybe you meant system() when you said exec()?)\n");
   }
-  
+
 While the above is a terribly contrived example, consider the win for a
 deeply nested pattern or worse yet, a pattern with many disjunctions.
 If a C<capture> property is found anywhere in
@@ -820,7 +820,7 @@ You cannot capture disjunctions, but that doesn't really make sense anyway.
 
 Same as above, except that you don't have to chain the conditions
 yourself.  If you pass an array-ref, opgrep will chain the conditions
-for you using C<next>. 
+for you using C<next>.
 The conditions can either be strings (taken as op-names), or
 hash-refs, with the same testable conditions as given above.
 
@@ -909,7 +909,7 @@ CONDITION:
 
                         # Fail if any entries match.
                         $_ ne $val
-                            or next CONDITION 
+                            or next CONDITION
                             for @{ $condition->{$test} }
                             [ 1 .. $#{ $condition->{$test} } ];
                     }
@@ -917,8 +917,8 @@ CONDITION:
 
                         # Fail if no entries match.
                         my $okay = 0;
-                        
-                        $_ eq $val and $okay = 1, last 
+
+                        $_ eq $val and $okay = 1, last
                             for @{ $condition->{$test} };
 
                         next CONDITION if not $okay;
@@ -952,7 +952,7 @@ CONDITION:
                     $capture->{$_} = $result->{$_} foreach keys %$result;
                 }
             }
-  
+
             # Apply all kids conditions. We $op->can(kids) (see above).
             if (exists $condition->{kids}) {
                 my $kidno = 0;
@@ -966,7 +966,7 @@ CONDITION:
 
                     my ($result) = opgrep( $kidconditions->[$kidno++], $kid );
                     next CONDITION if not $result;
-                    
+
                     if (not blessed($result)) {
                         # copy over the captured data/ops from the recursion
                         $capture->{$_} = $result->{$_} foreach keys %$result;
@@ -1027,7 +1027,7 @@ Example:
     first => { name => 'rv2hv', },
     'last' => { name => 'const', },
   };
-  
+
   my @ops = opgrep( {
       name => 'leavesub',
       first => {
@@ -1074,10 +1074,10 @@ sub op_or {
 # sub op_pattern_match {
 #   my $op = shift;
 #   my $pattern = shift;
-# 
+#
 #   my $ret = {};
-# 
-#   
+#
+#
 #   return $ret;
 # }
 

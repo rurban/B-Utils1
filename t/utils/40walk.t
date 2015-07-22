@@ -17,8 +17,8 @@ my $callback = sub
 foreach my $op (values %{all_roots()}) {
   walkoptree_simple( $op, $callback );
 }
-is_deeply(\@lines, 
-          [8, 15, 17, 18, 20, 29, 
+is_deeply(\@lines,
+          [8, 15, 17, 18, 20, 29,
            # 30,    # See FIXME: below
            32, 35,
            # 37,
