@@ -25,11 +25,11 @@ B::Utils1 - Helper functions for op tree manipulation
 
 =head1 VERSION
 
-1.0
+1.01
 
 =cut
 
-our $VERSION = '1.0';
+our $VERSION = '1.01';
 
 use base 'DynaLoader';
 bootstrap B::Utils1 $VERSION;
@@ -208,7 +208,7 @@ sub B::OP::_parent_impl {
     return (
         $op->sibling->_parent_impl( $target, "$cx$$op S " )
             || (
-              $cx =~ /^(?:\d+ S )*(?:\d+ N )*$/
+              $cx =~ /^(?:-?\d+ S )*(?:-?\d+ N )*$/
             ? $op->next->_parent_impl( $target, "$cx$$op N " )
             : ()
             )

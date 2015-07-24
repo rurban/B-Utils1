@@ -1,5 +1,11 @@
 Revision history for Perl extension B::Utils1.
 
+1.01 (rurban)
+
+   - Merge jbenjore/B-Utils/pull/9 by Andres Schwab
+     A pointer when viewed as signed integer may look negative.
+   - add README.md to repo
+
 1.0 (rurban)
    - Fork of B::Utils 0.27, which does not work with newer perls and is unmaintained.
    - Provide a backwards compatible B::OP::parent, patching the core B module.

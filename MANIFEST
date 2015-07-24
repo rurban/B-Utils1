@@ -4,6 +4,7 @@ Changes
 LICENSE
 MANIFEST
 Makefile.PL
+README.md
 Utils1.xs
 build/IFiles.pm
 lib/B/Utils1.pm
