@@ -3,7 +3,10 @@ Revision history for Perl extension B::Utils1.
 1.02 (rurban)
 
    - Fix PAUSE permissions for build/IFiles.pm.
-     Provide it even if user-generated.
+     Provide it even if now optionally user-generated.
+   - Allow building without ExtUtils::Depends.
+     Remove get_makefile_vars(), which only provided our typemap,
+     which is not needed to link with external modules.
 
 1.01 (rurban)
 

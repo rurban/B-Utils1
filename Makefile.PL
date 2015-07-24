@@ -5,17 +5,16 @@ use strict;
 my $req_EUDepends = 0.404;
 eval { require ExtUtils::Depends; };
 if ( $@ or ExtUtils::Depends->VERSION < $req_EUDepends ) {
-  print "ExtUtils::Depends $req_EUDepends is required to configure this module. Please install it manually or upgrade CPAN/cpanm\n";
-  exit(0);
+  warn "ExtUtils::Depends $req_EUDepends is required to maintain this module.\nUsing the packaged helper file.";
+} else {
+  my $pkg = ExtUtils::Depends->new('B::Utils1');
+  $pkg->install('BUtils1.h');
+  $pkg->add_xs("Utils1.xs");
+  $pkg->add_pm( 'lib/B/Utils1.pm' => '$(INST_LIB)/B/Utils1.pm',
+                'lib/B/Utils1/OP.pm' => '$(INST_LIB)/B/Utils1/OP.pm' );
+  $pkg->add_typemaps("typemap");
+  $pkg->save_config('build/IFiles.pm');
 }
-
-my $pkg = ExtUtils::Depends->new('B::Utils1');
-$pkg->install('BUtils1.h');
-$pkg->add_xs("Utils1.xs");
-$pkg->add_pm( 'lib/B/Utils1.pm' => '$(INST_LIB)/B/Utils1.pm',
-              'lib/B/Utils1/OP.pm' => '$(INST_LIB)/B/Utils1/OP.pm' );
-$pkg->add_typemaps("typemap");
-$pkg->save_config('build/IFiles.pm');
 
 use ExtUtils::MakeMaker;
 WriteMakefile1(
@@ -42,7 +41,6 @@ WriteMakefile1(
       keywords => ['op tree','perl internals'],
     },
     SIGN          => 1,
-    $pkg->get_makefile_vars,
     (($^O eq 'hpux') ? () :
      (FUNCLIST => [
 	'boot_B__Utils1', #necessary
