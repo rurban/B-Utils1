@@ -170,20 +170,19 @@ exists. Note that L<B::Utils> returns B::NULL instead.
 =cut
 
 BEGIN {
-  unless ($] >= 5.021002 and exists &B::OP::parent) {
+  if ($] >= 5.021002 and exists &B::OP::parent) {
     eval q[
+no warnings 'redefine';
 sub B::OP::parent {
     my $op     = shift;
     my $parent = $op->_parent_impl( $op, "" );
-
-    $parent;
+    return $parent && ref $parent ne 'B::NULL' ? $parent : undef;
 }];
   } else {
     eval q[
-sub B::OP::_parent {
+sub B::OP::parent {
     my $op     = shift;
-    my $parent = $op->_parent_impl( $op, "" );
-    $parent;
+    return $op->_parent_impl( $op, "" );
 }];
   }
   if ($] >= 5.021002) {

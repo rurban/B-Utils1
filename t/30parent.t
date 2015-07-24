@@ -53,18 +53,10 @@ walkoptree_simple(
     $root,
     sub {
         my $op = shift;
-        my $parent;
-
-        if ($] >= 5.021002 and exists &B::OP::parent) {
-            $parent = $op->_parent;
-        } else {
-            $parent = $op->parent;
-        }
+        my $parent =$op->parent;
 
         if ( $$op == $$root) {
-            # small discrepancy between core 5.21 (or -DPERL_OP_PARENT) returning B::NULL
-            # and B::Utils1::parent
-            ok( !$parent or ref $parent eq 'B::NULL',
+            ok( !$parent,
                 "No parent for root " . $op->stringify );
         }
         else {
