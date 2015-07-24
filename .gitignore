@@ -1,13 +1,17 @@
 *~
-/B-Utils-0.*
-/.build
+# regenerated with different key order
+build/IFiles.pm
+/B-Utils1-*
+/README.md
+/META.json
+/META.yml
 /MYMETA.json
 /MYMETA.yml
 /Makefile
-/OP.c
-/OP.o
-/Utils.bs
-/Utils.c
-/Utils.o
+/Utils1.bs
+/Utils1.c
+/Utils1.o
+/Utils1.i
 /blib
 pm_to_blib
+/Makefile.old

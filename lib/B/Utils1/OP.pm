@@ -1,32 +1,20 @@
-package B::Utils::OP;
+package B::Utils1::OP;
 
 require 5.006;
-use Carp 'croak';
-use strict;
-use warnings;
-use B::Utils ();
+use B::Utils1 ();
 
 our @ISA = 'Exporter';
 require Exporter;
-our $VERSION = '0.26';
+our $VERSION = '1.0';
 our @EXPORT = qw(parent_op return_op);
-
-
-push @ISA, 'DynaLoader';
-# the boot symbol is in B::Utils.  bootstrap doesn't like it, so we
-# need to load it manually.
-my $bootname = 'boot_B__Utils__OP';
-if (my $boot_symbol_ref = DynaLoader::dl_find_symbol_anywhere($bootname)) {
-    DynaLoader::dl_install_xsub(__PACKAGE__."::bootstrap", $boot_symbol_ref, __FILE__)->(__PACKAGE__, $VERSION);
-}
 
 =head1 NAME
 
-B::Utils::OP - op related utility functions for perl
+B::Utils1::OP - op related utility functions for perl
 
 =head1 SYNOPSIS
 
-  use B::Utils::OP qw(parent_op return_op);
+  use B::Utils1::OP qw(parent_op return_op);
   sub foo {
     my $pop = parent_op(0);
     my $rop = return_op(0);
@@ -80,16 +68,6 @@ In runtime, returns the L<B::OP> object whose next is the C<entersub> of the cur
 =item return_op($lv)
 
 In runtime, returns the L<B::OP> object that the current context is returning to at level C<$lv>
-
-=back
-
-=head2 B::CV METHODS
-
-=over
-
-=item $cv->NEW_with_start($root, $start)
-
-Clone the C<$cv> but with different C<$root> and C<$start>
 
 =back
 

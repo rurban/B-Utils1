@@ -22,7 +22,7 @@ test_data() for @empty_array;
 use strict;
 use Test::More;
 use B 'svref_2object';
-use B::Utils 'walkoptree_simple';
+use B::Utils1 'walkoptree_simple';
 
 # use B::Concise;
 # B::Concise::set_style(
@@ -32,7 +32,7 @@ use B::Utils 'walkoptree_simple';
 # );
 # B::Concise::compile("test_data")->();
 
-# FIXME: Consider moving this into B::Utils. But consider warning about
+# FIXME: Consider moving this into B::Utils1. But consider warning about
 # adding to B::OPS and B::Concise.
 sub has_branch($)
 {
@@ -63,7 +63,7 @@ walkoptree_simple(
 
         if ( $$op == $$root) {
             # small discrepancy between core 5.21 (or -DPERL_OP_PARENT) returning B::NULL
-            # and B::Utils::parent
+            # and B::Utils1::parent
             ok( !$parent or ref $parent eq 'B::NULL',
                 "No parent for root " . $op->stringify );
         }

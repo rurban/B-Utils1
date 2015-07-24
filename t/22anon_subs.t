@@ -1,7 +1,7 @@
 #!perl
 use Test::More tests => 2;
 use B 'svref_2object';
-use B::Utils 'anon_subs';
+use B::Utils1 'anon_subs';
 
 my $sub = sub {
     my $arg = shift;

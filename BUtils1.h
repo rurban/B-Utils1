@@ -1,5 +1,7 @@
-#ifndef _BUTILS_H_
-#define _BUTILS_H_
+#ifndef _BUTILS1_H_
+#define _BUTILS1_H_
+
+#include "ppport.h"
 
 typedef OP	*B__OP;
 typedef UNOP	*B__UNOP;
@@ -28,9 +30,13 @@ typedef CV	*B__CV;
 typedef GV	*B__GV;
 typedef IO	*B__IO;
 
-extern char *BUtils_cc_opclassname(pTHX_ const OP *o);
-extern SV *BUtils_make_sv_object(pTHX_ SV *arg, SV *sv);
+extern char *BUtils1_cc_opclassname(pTHX_ const OP *o);
+extern SV *BUtils1_make_sv_object(pTHX_ SV *arg, SV *sv);
 
-extern I32 BUtils_op_name_to_num(SV * name);
+extern I32 BUtils1_op_name_to_num(SV * name);
+
+extern PERL_CONTEXT *BUtils1_op_upcontext
+(pTHX_ I32 count, COP **cop_p, PERL_CONTEXT **ccstack_p,
+ I32 *cxix_from_p, I32 *cxix_to_p);
 
 #endif

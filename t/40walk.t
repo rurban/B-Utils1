@@ -3,7 +3,7 @@ use Test::More;
 use lib '../../lib';
 use lib '../../blib/arch/auto/B/Utils';
 use B qw(class);
-use B::Utils qw( all_roots walkoptree_simple);
+use B::Utils1 qw( all_roots walkoptree_simple);
 
 my @lines = ();
 my $callback = sub

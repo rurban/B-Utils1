@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More tests => 3;
-use B::Utils qw( walkallops_filtered opgrep );
+use B::Utils1 qw( walkallops_filtered opgrep );
 
 ok(defined &walkallops_filtered, "defined &walkallops_filtered");
 ok(defined &opgrep, "defined &opgrep");

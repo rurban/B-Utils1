@@ -1,7 +1,7 @@
 #!perl
 use Test::More tests => 4;
 use B 'svref_2object';
-use B::Utils 'all_starts';
+use B::Utils1 'all_starts';
 
 sub find_this { 1 }
 

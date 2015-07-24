@@ -1,7 +1,8 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include "BUtils.h"
+#include "BUtils1.h"
+#define NEED_sv_2pv_flags
 #include "ppport.h"
 
 /* After 5.10, the CxLVAL macro was added. */
@@ -9,7 +10,7 @@
 #  define CxLVAL(cx) cx->blk_sub.lval
 #endif
 
-#define MY_CXT_KEY "B::Utils::_guts" XS_VERSION
+#define MY_CXT_KEY "B::Utils1::_guts" XS_VERSION
 
 typedef struct {
     int		x_walkoptree_debug;	/* Flag for walkoptree debug hook */
@@ -41,26 +42,30 @@ START_MY_CXT
 #endif
 
 /* duplicated from B.xs. */
-static char *BUtils_svclassnames[] = {
+static char *BUtils1_svclassnames[] = {
     "B::NULL",
+#if PERL_VERSION < 19
+    "B::BIND",
+#endif
     "B::IV",
     "B::NV",
+#if PERL_VERSION <= 10
     "B::RV",
+#endif
     "B::PV",
+#if PERL_VERSION >= 19
+    "B::INVLIST",
+#endif
     "B::PVIV",
     "B::PVNV",
     "B::PVMG",
-    "B::BM",
-#if PERL_VERSION >= 9
-    "B::GV",
+#if PERL_VERSION >= 11
+    "B::REGEXP",
 #endif
     "B::PVLV",
     "B::AV",
     "B::HV",
     "B::CV",
-#if PERL_VERSION <= 8
-    "B::GV",
-#endif
     "B::FM",
     "B::IO",
 };
@@ -77,10 +82,12 @@ typedef enum {
     OPc_PADOP,	/* 8 */
     OPc_PVOP,	/* 9 */
     OPc_LOOP,	/* 10 */
-    OPc_COP	/* 11 */
-} BUtils_opclass;
+    OPc_COP,	/* 11 */
+    OPc_METHOP,	/* 12 */
+    OPc_UNOP_AUX /* 13 */
+} BUtils1_opclass;
 
-static char *BUtils_opclassnames[] = {
+static char *BUtils1_opclassnames[] = {
     "B::NULL",
     "B::OP",
     "B::UNOP",
@@ -92,11 +99,13 @@ static char *BUtils_opclassnames[] = {
     "B::PADOP",
     "B::PVOP",
     "B::LOOP",
-    "B::COP"	
+    "B::COP",
+    "B::METHOP",
+    "B::UNOP_AUX"
 };
 
-static BUtils_opclass
-BUtils_cc_opclass(pTHX_ const OP *o)
+static BUtils1_opclass
+BUtils1_cc_opclass(pTHX_ const OP *o)
 {
     if (!o)
 	return OPc_NULL;
@@ -204,13 +213,13 @@ BUtils_cc_opclass(pTHX_ const OP *o)
 }
 
 char *
-BUtils_cc_opclassname(pTHX_ const OP *o)
+BUtils1_cc_opclassname(pTHX_ const OP *o)
 {
-    return BUtils_opclassnames[BUtils_cc_opclass(aTHX_ o)];
+    return BUtils1_opclassnames[BUtils1_cc_opclass(aTHX_ o)];
 }
 
 I32
-BUtils_op_name_to_num(SV *name)
+BUtils1_op_name_to_num(SV *name)
 {
     dTHX;
     char const *s;
@@ -248,19 +257,143 @@ BUtils_op_name_to_num(SV *name)
 }
 
 SV *
-BUtils_make_sv_object(pTHX_ SV *arg, SV *sv)
+BUtils1_make_sv_object(pTHX_ SV *arg, SV *sv)
 {
     char *type = 0;
     IV iv;
     dMY_CXT;
 
     if (!type) {
-	type = BUtils_svclassnames[SvTYPE(sv)];
+	type = BUtils1_svclassnames[SvTYPE(sv)];
 	iv = PTR2IV(sv);
     }
     sv_setiv(newSVrv(arg, type), iv);
     return arg;
 }
 
-MODULE = B::Utils           PACKAGE = B::Utils
+/* Stolen from pp_ctl.c (with modifications) */
+
+static I32
+BUtils1_dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
+{
+    dTHR;
+    I32 i;
+    PERL_CONTEXT *cx;
+    for (i = startingblock; i >= 0; i--) {
+        cx = &cxstk[i];
+        switch (CxTYPE(cx)) {
+        default:
+            continue;
+        /*case CXt_EVAL:*/
+        case CXt_SUB:
+        /* In Perl 5.005, formats just used CXt_SUB */
+#ifdef CXt_FORMAT
+        case CXt_FORMAT:
+#endif
+            DEBUG_l( Perl_deb(aTHX_ "(Found sub #%ld)\n", (long)i));
+            return i;
+        }
+    }
+    return i;
+}
+
+static I32
+BUtils1_dopoptosub(pTHX_ I32 startingblock)
+{
+    dTHR;
+    return BUtils1_dopoptosub_at(aTHX_ cxstack, startingblock);
+}
+
+/* This function is based on the code of pp_caller */
+PERL_CONTEXT*
+BUtils1_op_upcontext(pTHX_ I32 count, COP **cop_p, PERL_CONTEXT **ccstack_p,
+                    I32 *cxix_from_p, I32 *cxix_to_p)
+{
+    PERL_SI *top_si = PL_curstackinfo;
+    I32 cxix = BUtils1_dopoptosub(aTHX_ cxstack_ix);
+    PERL_CONTEXT *ccstack = cxstack;
+
+    if (cxix_from_p) *cxix_from_p = cxstack_ix+1;
+    if (cxix_to_p)   *cxix_to_p   = cxix;
+    for (;;) {
+        /* we may be in a higher stacklevel, so dig down deeper */
+        while (cxix < 0 && top_si->si_type != PERLSI_MAIN) {
+            top_si  = top_si->si_prev;
+            ccstack = top_si->si_cxstack;
+            cxix = BUtils1_dopoptosub_at(aTHX_ ccstack, top_si->si_cxix);
+                        if (cxix_to_p && cxix_from_p) *cxix_from_p = *cxix_to_p;
+                        if (cxix_to_p) *cxix_to_p = cxix;
+        }
+        if (cxix < 0 && count == 0) {
+                    if (ccstack_p) *ccstack_p = ccstack;
+            return (PERL_CONTEXT *)0;
+                }
+        else if (cxix < 0)
+            return (PERL_CONTEXT *)-1;
+        if (PL_DBsub && cxix >= 0 &&
+                ccstack[cxix].blk_sub.cv == GvCV(PL_DBsub))
+            count++;
+        if (!count--)
+            break;
+
+        if (cop_p) *cop_p = ccstack[cxix].blk_oldcop;
+        cxix = BUtils1_dopoptosub_at(aTHX_ ccstack, cxix - 1);
+                        if (cxix_to_p && cxix_from_p) *cxix_from_p = *cxix_to_p;
+                        if (cxix_to_p) *cxix_to_p = cxix;
+    }
+    if (ccstack_p) *ccstack_p = ccstack;
+    return &ccstack[cxix];
+}
+
+/* The most popular error message */
+#define TOO_FAR \
+  croak("want: Called from outside a subroutine")
+
+/* Between 5.9.1 and 5.9.2 the retstack was removed, and the
+   return op is now stored on the cxstack. */
+#define HAS_RETSTACK (\
+  PERL_REVISION < 5 || \
+  (PERL_REVISION == 5 && PERL_VERSION < 9) || \
+  (PERL_REVISION == 5 && PERL_VERSION == 9 && PERL_SUBVERSION < 2) \
+)
+
+OP*
+BUtils1_find_return_op(pTHX_ I32 uplevel)
+{
+    PERL_CONTEXT *cx = BUtils1_op_upcontext(aTHX_ uplevel, 0, 0, 0, 0);
+    if (!cx) TOO_FAR;
+#if HAS_RETSTACK
+    return PL_retstack[cx->blk_oldretsp - 1];
+#else
+    return cx->blk_sub.retop;
+#endif
+}
+
+OP*
+BUtils1_find_oldcop(pTHX_ I32 uplevel)
+{
+    PERL_CONTEXT *cx = BUtils1_op_upcontext(aTHX_ uplevel, 0, 0, 0, 0);
+    if (!cx) TOO_FAR;
+    return (OP*) cx->blk_oldcop;
+}
+
+MODULE = B::Utils1::OP           PACKAGE = B::Utils1::OP        PREFIX = BUtils1_OP_
 PROTOTYPES: DISABLE
+
+B::OP
+parent_op(I32 uplevel)
+  CODE:
+    RETVAL = BUtils1_find_oldcop(aTHX_ uplevel);
+  OUTPUT:
+    RETVAL
+
+B::OP
+return_op(I32 uplevel)
+  CODE:
+    RETVAL = BUtils1_find_return_op(aTHX_ uplevel);
+  OUTPUT:
+    RETVAL
+
+MODULE = B::Utils1           PACKAGE = B::Utils1
+PROTOTYPES: DISABLE
+

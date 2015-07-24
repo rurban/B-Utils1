@@ -2,34 +2,27 @@
 use 5.006;
 use strict;
 
-my $ExtUtils_Depends_required = 0.302;
-eval {
-	require ExtUtils::Depends;
-};
-if ( $@ or ExtUtils::Depends->VERSION < $ExtUtils_Depends_required ) {
-	print "ExtUtils::Depends $ExtUtils_Depends_required is required to configure this module, please install it manually or upgrade your CPAN/CPANPLUS shell\n";
-	exit(0);
+my $req_EUDepends = 0.404;
+eval { require ExtUtils::Depends; };
+if ( $@ or ExtUtils::Depends->VERSION < $req_EUDepends ) {
+  print "ExtUtils::Depends $req_EUDepends is required to configure this module. Please install it manually or upgrade CPAN/cpanm\n";
+  exit(0);
 }
 
 my $pkg = ExtUtils::Depends->new('B::Utils');
-
-$pkg->install('BUtils.h');
-
-$pkg->add_xs("Utils.xs", "OP.xs");
-
-$pkg->add_pm( 'lib/B/Utils.pm' => '$(INST_LIB)/B/Utils.pm',
-              'lib/B/Utils/OP.pm' => '$(INST_LIB)/B/Utils/OP.pm' );
-
+$pkg->install('BUtils1.h');
+$pkg->add_xs("Utils1.xs");
+$pkg->add_pm( 'lib/B/Utils1.pm' => '$(INST_LIB)/B/Utils1.pm',
+              'lib/B/Utils1/OP.pm' => '$(INST_LIB)/B/Utils1/OP.pm' );
 $pkg->add_typemaps("typemap");
-
 $pkg->save_config('build/IFiles.pm');
 
 use ExtUtils::MakeMaker;
-
 WriteMakefile1(
-    NAME          => 'B::Utils',
-    VERSION_FROM  => 'lib/B/Utils.pm',
+    NAME          => 'B::Utils1',
+    VERSION_FROM  => 'lib/B/Utils1.pm',
     PREREQ_PM     => {
+        'ExtUtils::Depends' => 0.404, # DD Sortkeys
         'Scalar::Util' => 0,
         'Task::Weaken' => 0,
         'Exporter'     => 0,
@@ -37,26 +30,23 @@ WriteMakefile1(
     BUILD_REQUIRES => {
         'Test::More' => 0,
     },
-    CONFIGURE_REQUIRES => {
-        'ExtUtils::Depends' => $ExtUtils_Depends_required,
-    },
-    ABSTRACT_FROM => 'lib/B/Utils.pm',
-    AUTHOR        => 'Josh Jore <jjore@cpan.org>',
+    ABSTRACT_FROM => 'lib/B/Utils1.pm',
+    AUTHOR        => 'Reini Urban <rurban@cpan.org>',
     LICENSE       => 'perl',
     MIN_PERL_VERSION => 5.006,
     META_MERGE => {
       resources => {
-        repository => 'http://github.com/jbenjore/B-Utils/tree',
+        repository => 'http://github.com/rurban/B-Utils1',
+        license    => 'http://dev.perl.org/licenses/',
       },
       keywords => ['op tree','perl internals'],
     },
-    test          => { TESTS => 't/*.t t/*/*.t' },
     SIGN          => 1,
     $pkg->get_makefile_vars,
     (($^O eq 'hpux') ? () :
      (FUNCLIST => [
-	'boot_B__Utils', #necessary for work of B::Utils
-	qw/BUtils_cc_opclassname BUtils_make_sv_object BUtils_op_name_to_num/, #defined in BUtils.h
+	'boot_B__Utils1', #necessary
+	qw/BUtils1_cc_opclassname BUtils1_make_sv_object BUtils1_op_name_to_num/, #defined in BUtils1.h
       ])),
 );
 
@@ -64,12 +54,7 @@ sub WriteMakefile1 {
     my %params=@_;
     my $eumm_version=$ExtUtils::MakeMaker::VERSION;
     $eumm_version=eval $eumm_version;
-    die "EXTRA_META is deprecated" if exists $params{EXTRA_META};
-    die "License not specified" if not exists $params{LICENSE};
     if ($params{BUILD_REQUIRES}) { #and $eumm_version < 6.5503
-        #Should be modified in future when EUMM will
-        #correctly support BUILD_REQUIRES.
-        #EUMM 6.5502 has problems with BUILD_REQUIRES
         $params{PREREQ_PM}={ %{$params{PREREQ_PM} || {}} , %{$params{BUILD_REQUIRES}} };
         delete $params{BUILD_REQUIRES};
     }
@@ -81,4 +66,47 @@ sub WriteMakefile1 {
     delete $params{AUTHOR} if $] < 5.005;
     delete $params{ABSTRACT_FROM} if $] < 5.005;
     WriteMakefile(%params);
+}
+
+package MY;
+use Config;
+
+sub depend {
+  "
+MANIFEST :
+	git ls-tree -r --name-only HEAD >MANIFEST
+
+ppport :
+	\$(PERLRUNINST) -MDevel::PPPort -e'Devel::PPPort::WriteFile'
+
+README.md : \$(VERSION_FROM)
+	pod2markdown \$(VERSION_FROM) > \$@
+
+release : dist
+	echo git commit -a -m\"release \$(VERSION)\"
+	git tag \$(VERSION)
+	cpan-upload \$(DISTVNAME).tar\$(SUFFIX)
+	git push
+	git push --tags
+
+test_cover :: pure_all
+	\$(RM_RF) cover_db
+	\$(PERLRUNINST) -S cover -test
+test_coveralls :: pure_all
+	\$(PERLRUNINST) -S cover -test -report coveralls
+
+gcov : \$(BASEEXT).c.gcov \$(BASEEXT).gcov cover_db/\$(BASEEXT)-xs.html
+
+\$(BASEEXT).c.gcov \$(BASEEXT).xs.gcov : \$(BASEEXT).xs
+	\$(MAKE) CCFLAGS=\"\$(CCFLAGS) -fprofile-arcs -ftest-coverage\" LDDLFLAGS=\"\$(LDDLFLAGS) -fprofile-arcs -ftest-coverage\"
+	gcov \$(BASEEXT).c \$(BASEEXT).xs
+
+cover_db/\$(BASEEXT)-xs.html : \$(BASEEXT).xs.gcov
+	PERL5OPT=-MDevel::Cover make test
+	-$^X -S gcov2perl \$(BASEEXT).c.gcov \$(BASEEXT).xs.gcov
+	$^X -S cover
+
+gprof :
+	\$(MAKE) CCFLAGS=\"\$(CCFLAGS) -pg\" LDDLFLAGS=\"\$(LDDLFLAGS) -pg\"
+"
 }

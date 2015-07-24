@@ -1,9 +1,9 @@
-package B::Utils;
+package B::Utils1;
 
 use 5.006;
 use strict;
 use warnings;
-use vars qw( $VERSION @EXPORT_OK %EXPORT_TAGS
+use vars qw( @EXPORT_OK %EXPORT_TAGS
     @bad_stashes $TRACE_FH $file $line $sub );
 
 use subs (
@@ -19,45 +19,25 @@ use Scalar::Util qw( weaken blessed );
 
 =head1 NAME
 
-B::Utils - Helper functions for op tree manipulation
+B::Utils1 - Helper functions for op tree manipulation
 
 =cut
-
-
-# NOTE: The pod/code version here and in README are computer checked
-# by xt/version.t. Keep them in sync.
 
 =head1 VERSION
 
-0.26
+1.0
 
 =cut
 
-$VERSION = '0.26';
-
-
-=head1 INSTALLATION
-
-To install this module, run the following commands:
-
-    perl Makefile.PL
-    make
-    make test
-    make install
-
-=cut
-
-
+our $VERSION = '1.0';
 
 use base 'DynaLoader';
-bootstrap B::Utils $VERSION;
-#bootstrap B::Utils::OP $VERSION;
-#B::Utils::OP::boot_B__Utils__OP();
+bootstrap B::Utils1 $VERSION;
 sub dl_load_flags {0x01}
 
 =head1 SYNOPSIS
 
-  use B::Utils;
+  use B::Utils1;
 
 =cut
 
@@ -78,7 +58,6 @@ use Exporter ();
 use List::Util qw( shuffle );
 
 BEGIN {
-
     # Fake up a TRACE constant and set $TRACE_FH
     BEGIN { $^W = 0 }
     no warnings;
@@ -113,7 +92,7 @@ sub _FALSE () { !!0 }
 #
 #     $op->first if $op->can('first');
 #
-# B::Utils provided every op with first, last and other methods which
+# B::Utils1 provided every op with first, last and other methods which
 # will simply returned nothing if it isn't relevent. But this broke B::Concise
 #
 # =cut
@@ -185,7 +164,8 @@ figure out how to do that.
 Warning: Since 5.21.2 B comes with it's own version of B::OP::parent
 which returns either B::NULL or the real parent when ccflags contains
 -DPERL_OP_PARENT.
-In this case rather use $op->_parent.
+We patch away this broken B::OP::parent and return again undef if no parent
+exists. Note that L<B::Utils> returns B::NULL instead.
 
 =cut
 
@@ -446,9 +426,9 @@ to subroutine name; the optree for main program is simply keyed to C<__MAIN__>.
 
 B<Note>: Certain "dangerous" stashes are not scanned for subroutines:
 the list of such stashes can be found in
-C<@B::Utils::bad_stashes>. Feel free to examine and/or modify this to
+C<@B::Utils1::bad_stashes>. Feel free to examine and/or modify this to
 suit your needs. The intention is that a simple program which uses no
-modules other than C<B> and C<B::Utils> would show no addition
+modules other than C<B> and C<B::Utils1> would show no addition
 symbols.
 
 This does B<not> return the details of ops in anonymous subroutines
@@ -536,7 +516,7 @@ sub _init_sub_cache {
 
 sub B::GV::_B_Utils_init_sub_cache {
 
-    # This is a callback function called from B::Utils::_init via
+    # This is a callback function called from B::Utils1::_init via
     # B::walksymtable.
 
     my $gv = shift;
@@ -581,7 +561,7 @@ sub B::GV::_B_Utils_init_sub_cache {
 
 # sub B::SPECIAL::_B_Utils_init_sub_cache {
 #
-#     # This is a callback function called from B::Utils::_init via
+#     # This is a callback function called from B::Utils1::_init via
 #     # B::walksymtable.
 #
 #     # JJ: I'm not sure why this callback function exists.
@@ -596,19 +576,19 @@ they're all rather difficult to use, requiring you to inject methods
 into the C<B::OP> class. This is a very simple op tree walker with
 more expected semantics.
 
-All the C<walk> functions set C<$B::Utils::file>, C<$B::Utils::line>,
-and C<$B::Utils::sub> to the appropriate values of file, line number,
+All the C<walk> functions set C<$B::Utils1::file>, C<$B::Utils::line>,
+and C<$B::Utils1::sub> to the appropriate values of file, line number,
 and sub name in the program being examined.
 
 =cut
 
-$B::Utils::file = '__none__';
-$B::Utils::line = 0;
-$B::Utils::sub  = undef;
+$B::Utils1::file = '__none__';
+$B::Utils1::line = 0;
+$B::Utils1::sub  = undef;
 
 sub walkoptree_simple {
-    $B::Utils::file = '__none__';
-    $B::Utils::line = 0;
+    $B::Utils1::file = '__none__';
+    $B::Utils1::line = 0;
 
     _walkoptree_simple( {}, @_ );
 
@@ -621,8 +601,8 @@ sub _walkoptree_simple {
     return if $visited->{$$op}++;
 
     if ( ref $op and $op->isa("B::COP") ) {
-        $B::Utils::file = $op->file;
-        $B::Utils::line = $op->line;
+        $B::Utils1::file = $op->file;
+        $B::Utils1::line = $op->line;
     }
 
     $callback->( $op, $data );
@@ -656,8 +636,8 @@ for building your own filters.
 =cut
 
 sub walkoptree_filtered {
-    $B::Utils::file = '__none__';
-    $B::Utils::line = 0;
+    $B::Utils1::file = '__none__';
+    $B::Utils1::line = 0;
 
     _walkoptree_filtered( {}, @_ );;
 
@@ -668,8 +648,8 @@ sub _walkoptree_filtered {
     my ( $visited, $op, $filter, $callback, $data ) = @_;
 
     if ( $op->isa("B::COP") ) {
-        $B::Utils::file = $op->file;
-        $B::Utils::line = $op->line;
+        $B::Utils1::file = $op->file;
+        $B::Utils1::line = $op->line;
     }
 
     $callback->( $op, $data ) if $filter->($op);
@@ -695,14 +675,14 @@ sub _walkoptree_filtered {
 =item C<walkallops_simple(\&callback, [$data])>
 
 This combines C<walkoptree_simple> with C<all_roots> and C<anon_subs>
-to examine every op in the program. C<$B::Utils::sub> is set to the
+to examine every op in the program. C<$B::Utils1::sub> is set to the
 subroutine name if you're in a subroutine, C<__MAIN__> if you're in
 the main program and C<__ANON__> if you're in an anonymous subroutine.
 
 =cut
 
 sub walkallops_simple {
-    $B::Utils::sub = undef;
+    $B::Utils1::sub = undef;
 
     &_walkallops_simple;
 
@@ -715,12 +695,12 @@ sub _walkallops_simple {
     _init_sub_cache();
 
     for my $sub_name (sort keys %roots) {
-	$B::Utils::sub = $sub_name;
+	$B::Utils1::sub = $sub_name;
 	my $root = $roots{$sub_name};
 	walkoptree_simple( $root, $callback, $data );
     }
 
-    $B::Utils::sub = "__ANON__";
+    $B::Utils1::sub = "__ANON__";
     walkoptree_simple( $_->{root}, $callback, $data ) for @anon_subs;
 
     return _TRUE;
@@ -733,7 +713,7 @@ Same as above, but filtered.
 =cut
 
 sub walkallops_filtered {
-    $B::Utils::sub = undef;
+    $B::Utils1::sub = undef;
 
     &_walkallops_filtered;
 
@@ -747,7 +727,7 @@ sub _walkallops_filtered {
 
     walkoptree_filtered( $_, $filter, $callback, $data ) for values %roots;
 
-    $B::Utils::sub = "__ANON__";
+    $B::Utils1::sub = "__ANON__";
 
     walkoptree_filtered( $_->{root}, $filter, $callback, $data )
         for @anon_subs;
@@ -1122,11 +1102,17 @@ tree.
 sub carp (@)  { CORE::warn( _preparewarn(@_) ) }
 sub croak (@) { CORE::die( _preparewarn(@_) ) }
 
+=item C<dl_load_flags 1>
+
+Override L<DynaLoader> default to force global loading.
+
+=cut
+
 sub _preparewarn {
     my $args = join '', @_;
     $args = "Something's wrong " unless $args;
     if ( "\n" ne substr $args, -1, 1 ) {
-        $args .= " at $B::Utils::file line $B::Utils::line.\n";
+        $args .= " at $B::Utils1::file line $B::Utils::line.\n";
     }
     return $args;
 }
@@ -1142,23 +1128,33 @@ None by default.
 This modules uses L<ExtUtils::Depends> to export some useful functions
 for XS modules to use.  To use those, include in your Makefile.PL:
 
-  my $pkg = ExtUtils::Depends->new("Your::XSModule", "B::Utils");
+  my $pkg = ExtUtils::Depends->new("Your::XSModule", "B::Utils1");
   WriteMakefile(
     ... # your normal makefile flags
     $pkg->get_makefile_vars,
   );
 
-Your XS module can now include F<BUtils.h> and F<BUtils_op.h>.  To see
+Your XS module can now include F<BUtils1.h>.  To see
 document for the functions provided, use:
 
-  perldoc -m B::Utils::Install::BUtils.h
-  perldoc -m B::Utils::Install::BUtils_op.h
+  perldoc -m B::Utils1::Install::BUtils.h
+
+=head1 INSTALLATION
+
+To install this module, you may want to run the following commands:
+
+    perl Makefile.PL
+    make test
+    sudo make install
 
 =head1 AUTHOR
 
-Originally written by Simon Cozens, C<simon@cpan.org>
-Maintained by Joshua ben Jore, C<jjore@cpan.org> and
-Reini Urban C<rurban@cpan.org>.
+Maintained by Reini Urban C<rurban@cpan.org>.
+
+Originally written by Simon Cozens, C<simon@cpan.org> as B::Utils.
+
+Previously maintained by Joshua ben Jore, C<jjore@cpan.org> and Karen
+Etheridge as B::Utils.
 
 Contributions from Mattia Barbon, Jim Cromie, Steffen Mueller, and
 Chia-liang Kao, Alexandr Ciornii.
@@ -1170,10 +1166,8 @@ under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<B>, L<B::Generate>.
+L<B::Utils>, L<B>, L<B::Generate>.
 
 =cut
 
-"Wow, you're pretty uptight for a guy who worships a multi-armed,
-hermaphrodite embodiment of destruction who has a fetish for vaguely
-phallic shaped headgear.";
+1;
