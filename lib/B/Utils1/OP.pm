@@ -5,7 +5,7 @@ use B::Utils1 ();
 
 our @ISA = 'Exporter';
 require Exporter;
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 our @EXPORT = qw(parent_op return_op);
 
 =head1 NAME

@@ -1,5 +1,10 @@
 Revision history for Perl extension B::Utils1.
 
+1.02 (rurban)
+
+   - Fix PAUSE permissions for build/IFiles.pm.
+     Provide it even if user-generated.
+
 1.01 (rurban)
 
    - Merge jbenjore/B-Utils/pull/9 by Andres Schwab

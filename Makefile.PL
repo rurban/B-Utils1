@@ -9,7 +9,7 @@ if ( $@ or ExtUtils::Depends->VERSION < $req_EUDepends ) {
   exit(0);
 }
 
-my $pkg = ExtUtils::Depends->new('B::Utils');
+my $pkg = ExtUtils::Depends->new('B::Utils1');
 $pkg->install('BUtils1.h');
 $pkg->add_xs("Utils1.xs");
 $pkg->add_pm( 'lib/B/Utils1.pm' => '$(INST_LIB)/B/Utils1.pm',

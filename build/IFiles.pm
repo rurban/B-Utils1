@@ -1,4 +1,4 @@
-package B::Utils::Install::Files;
+package B::Utils1::Install::Files;
 
 $self = {
           'deps' => [],
@@ -16,8 +16,8 @@ $inc = $self->{inc};
 
 	$CORE = undef;
 	foreach (@INC) {
-		if ( -f $_ . "/B/Utils/Install/Files.pm") {
-			$CORE = $_ . "/B/Utils/Install/";
+		if ( -f $_ . "/B/Utils1/Install/Files.pm") {
+			$CORE = $_ . "/B/Utils1/Install/";
 			last;
 		}
 	}
