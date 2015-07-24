@@ -21,12 +21,11 @@ WriteMakefile1(
     NAME          => 'B::Utils1',
     VERSION_FROM  => 'lib/B/Utils1.pm',
     PREREQ_PM     => {
-        'ExtUtils::Depends' => 0.404, # DD Sortkeys
         'Scalar::Util' => 0,
-        'Task::Weaken' => 0,
         'Exporter'     => 0,
     },
     BUILD_REQUIRES => {
+        'ExtUtils::Depends' => 0.404, # DD Sortkeys
         'Test::More' => 0,
     },
     ABSTRACT_FROM => 'lib/B/Utils1.pm',
