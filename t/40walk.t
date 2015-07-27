@@ -3,7 +3,7 @@ use Test::More;
 use lib '../../lib';
 use lib '../../blib/arch/auto/B/Utils';
 use B qw(class);
-use B::Utils1 qw( all_roots walkoptree_simple);
+use B::Utils qw( all_roots walkoptree_simple);
 
 my @lines = ();
 my $callback = sub
@@ -17,20 +17,15 @@ my $callback = sub
 foreach my $op (values %{all_roots()}) {
   walkoptree_simple( $op, $callback );
 }
-my $expected = [8, 15, 17, 18, 20, 21, 27, 32, 35, 38, 39];
-if ($] < 5.007) {
-  $expected =  [8, 15, 17, 18, 17, 20, 21, 27, 32, 35, 38, 39];
-} elsif ($] >= 5.021008) {
-  $expected = [8, 15, 17, 17, 18, 20, 21, 22, 23, 24, 27, 32, 33, 35, 38, 39];
-}
-
-is_deeply(\@lines, 
-          $expected,
+is_deeply(\@lines,
+          [8, 15, 17, 17, 18, 20, 27, 28, 30, 33, 34
+           # 35,
+           ],
           'walkoptree_simple lines of ' . __FILE__);
 
 # For testing following if/else in code.
 if (@lines) {
-  ok(1);     # FIXME: This line isn't coming out.
+  ok(1);     # We had a bug in not getting this line number once
 } else {
   ok(0);
 }
