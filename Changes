@@ -1,8 +1,13 @@
 Revision history for Perl extension B::Utils1.
 
+1.03 (rurban)
+
+   - Add $trace_removed and file/line for removed COPs (Rocky Bernstein)
+     Simplify t/40walk.t to use it.
+
 1.02 (rurban)
 
-   - Fix PAUSE permissions for build/IFiles.pm.
+   - Fix PAUSE permissions for build/IFiles.pm.t
      Provide it even if now optionally user-generated.
    - Allow building without ExtUtils::Depends.
      Remove get_makefile_vars(), which only provided our typemap,

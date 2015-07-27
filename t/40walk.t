@@ -1,33 +1,38 @@
 #!perl
 use Test::More;
-use lib '../../lib';
-use lib '../../blib/arch/auto/B/Utils';
 use B qw(class);
-use B::Utils qw( all_roots walkoptree_simple);
+use B::Utils1 qw( all_roots walkoptree_simple);
 
 my @lines = ();
-my $callback = sub
-{
+my $callback = sub {
   my $op = shift;
-  if ('COP' eq B::class($op) and  $op->file eq __FILE__) {
-    push @lines, $op->line;
+  # collect existing cops, and also perl specific optimized away cops
+  if (($op->isa('B::NULL') and $B::Utils1::file eq __FILE__ and $B::Utils1::trace_removed)
+      or ('COP' eq B::class($op) and $op->file eq __FILE__)) {
+    if ('COP' eq B::class($op)
+        or (!$op->isa('B::NULL') and $op->oldname =~ /^(next|db)state$/)) {
+      push @lines, $op->line;
+    }
   }
 };
 
 foreach my $op (values %{all_roots()}) {
   walkoptree_simple( $op, $callback );
 }
-is_deeply(\@lines,
-          [8, 15, 17, 17, 18, 20, 27, 28, 30, 33, 34
-           # 35,
-           ],
+
+my $expected = $] >= 5.008
+  ? [6, 17, 19, 19, 20, 23, 27, 32, 33, 35, 38, 39]
+  : [6, 17, 19, 19, 20, 19, 23, 27, 32, 33, 35, 38, 39]; # more cops in 5.6
+
+is_deeply(\@lines, 
+          $expected,
           'walkoptree_simple lines of ' . __FILE__);
 
-# For testing following if/else in code.
+# For testing following if/else in code
 if (@lines) {
-  ok(1);     # We had a bug in not getting this line number once
+  ok(1, "if/else folding");
 } else {
-  ok(0);
+  ok(0, "invalid if/else folding");
 }
 
 diag join(', ', @lines), "\n";

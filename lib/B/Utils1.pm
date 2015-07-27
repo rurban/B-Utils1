@@ -605,16 +605,16 @@ sub _walkoptree_simple {
     if ( ref $op and $op->isa("B::COP") ) {
         $B::Utils1::file = $op->file;
         $B::Utils1::line = $op->line;
-        $trace_removed = _FALSE;
-    } elsif ( !$op->isa('B::NULL') and $op->oldname eq 'nextstate' ) {
+        $B::Utils1::trace_removed = _FALSE;
+    } elsif ( !$op->isa('B::NULL') and $op->oldname =~ /^(next|db)state$/) {
         # COP nextstate has been optimized away.  However by turning
-        # this back into a COP we can retrieve the file and line
+        # this locally back into a COP we can retrieve the file and line
         # values.
         my $cop = $op;
         bless $cop, 'B::COP';
         $B::Utils1::file = $cop->file;
         $B::Utils1::line = $cop->line;
-        $trace_removed = _TRUE;
+        $B::Utils1::trace_removed = _TRUE;
     }
 
     $callback->( $op, $data );
