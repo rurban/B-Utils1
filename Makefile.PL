@@ -79,8 +79,8 @@ ppport :
 README.md : \$(VERSION_FROM)
 	pod2markdown \$(VERSION_FROM) > \$@
 
-release : dist
-	echo git commit -a -m\"release \$(VERSION)\"
+release : README.md dist
+	test -z \"\$(shell git diff --raw)\" || exit
 	git tag \$(VERSION)
 	cpan-upload \$(DISTVNAME).tar\$(SUFFIX)
 	git push
@@ -92,10 +92,10 @@ test_cover :: pure_all
 test_coveralls :: pure_all
 	\$(PERLRUNINST) -S cover -test -report coveralls
 
-gcov : \$(BASEEXT).c.gcov \$(BASEEXT).gcov cover_db/\$(BASEEXT)-xs.html
+gcov : \$(BASEEXT).c.gcov \$(BASEEXT).xs.gcov cover_db/\$(BASEEXT)-xs.html
 
 \$(BASEEXT).c.gcov \$(BASEEXT).xs.gcov : \$(BASEEXT).xs
-	\$(MAKE) CCFLAGS=\"\$(CCFLAGS) -fprofile-arcs -ftest-coverage\" LDDLFLAGS=\"\$(LDDLFLAGS) -fprofile-arcs -ftest-coverage\"
+	+\$(MAKE) CCFLAGS=\"\$(CCFLAGS) -fprofile-arcs -ftest-coverage\" LDDLFLAGS=\"\$(LDDLFLAGS) -fprofile-arcs -ftest-coverage\"
 	gcov \$(BASEEXT).c \$(BASEEXT).xs
 
 cover_db/\$(BASEEXT)-xs.html : \$(BASEEXT).xs.gcov
