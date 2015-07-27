@@ -4,7 +4,7 @@ B::Utils1 - Helper functions for op tree manipulation
 
 # VERSION
 
-1.02
+1.03
 
 # SYNOPSIS
 
@@ -15,7 +15,7 @@ B::Utils1 - Helper functions for op tree manipulation
 - `$op->oldname`
 
     Returns the name of the op, even if it is currently optimized to null.
-    This helps you understand the stucture of the op tree.
+    This helps you understand the structure of the op tree.
 
 - `$op->kids`
 
@@ -85,7 +85,7 @@ B::Utils1 - Helper functions for op tree manipulation
 
     `attributes` is a list of attributes to include in the produced
     pattern. The attributes that can be checked against in this way
-    are 
+    are:
 
         name targ type seq flags private pmflags pmpermflags.
 
@@ -134,6 +134,9 @@ B::Utils1 - Helper functions for op tree manipulation
     All the `walk` functions set `$B::Utils1::file`, `$B::Utils::line`,
     and `$B::Utils1::sub` to the appropriate values of file, line number,
     and sub name in the program being examined.
+    Sets `$B::Utils::trace_removed` when the nextstate COPs that contained
+    that line was optimized away. Such lines won't normally be
+    step-able or breakpoint-able in a debugger without special work.
 
 - `walkoptree_filtered($op, \&filter, \&callback, [$data])`
 
@@ -222,13 +225,12 @@ B::Utils1 - Helper functions for op tree manipulation
           },
           $root_op
         );
-        
+
         if ($result) {
           my $name = $result->{notreached}->name; # result is *not* the root op
           carp("Statement unlikely to be reached (op name: $name)");
           carp("\t(Maybe you meant system() when you said exec()?)\n");
         }
-        
 
     While the above is a terribly contrived example, consider the win for a
     deeply nested pattern or worse yet, a pattern with many disjunctions.
@@ -246,7 +248,7 @@ B::Utils1 - Helper functions for op tree manipulation
 
     Same as above, except that you don't have to chain the conditions
     yourself.  If you pass an array-ref, opgrep will chain the conditions
-    for you using `next`. 
+    for you using `next`.
     The conditions can either be strings (taken as op-names), or
     hash-refs, with the same testable conditions as given above.
 
@@ -264,7 +266,7 @@ B::Utils1 - Helper functions for op tree manipulation
           first => { name => 'rv2hv', },
           'last' => { name => 'const', },
         };
-        
+
         my @ops = opgrep( {
             name => 'leavesub',
             first => {

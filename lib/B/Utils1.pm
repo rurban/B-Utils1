@@ -25,11 +25,11 @@ B::Utils1 - Helper functions for op tree manipulation
 
 =head1 VERSION
 
-1.02
+1.03
 
 =cut
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 use base 'DynaLoader';
 bootstrap B::Utils1 $VERSION;
