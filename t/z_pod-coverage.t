@@ -12,7 +12,11 @@ plan skip_all => "Test::Pod::Coverage 1.04 required for testing POD coverage"
     if $@;
 
 for (all_modules()) {
-  pod_coverage_ok($_) unless /B::Utils1::Install::Files/;
+  if ($_ eq 'B::Utils1::Install::IFiles') {
+    diag "skip generated $_";
+  } else {
+    pod_coverage_ok($_);
+  }
 }
 
 done_testing;

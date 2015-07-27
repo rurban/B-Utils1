@@ -4,7 +4,7 @@ B::Utils1 - Helper functions for op tree manipulation
 
 # VERSION
 
-1.03
+1.04
 
 # SYNOPSIS
 

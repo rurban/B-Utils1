@@ -1,5 +1,10 @@
 Revision history for Perl extension B::Utils1.
 
+1.04 (rurban)
+
+   - Move build/IFiles.pm to lib/B/Utils1/Install/
+     make test_cover mistakes build as MB script.
+
 1.03 (rurban)
 
    - Add $trace_removed and file/line for removed COPs (Rocky Bernstein)

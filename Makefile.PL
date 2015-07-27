@@ -13,7 +13,7 @@ if ( $@ or ExtUtils::Depends->VERSION < $req_EUDepends ) {
   $pkg->add_pm( 'lib/B/Utils1.pm' => '$(INST_LIB)/B/Utils1.pm',
                 'lib/B/Utils1/OP.pm' => '$(INST_LIB)/B/Utils1/OP.pm' );
   $pkg->add_typemaps("typemap");
-  $pkg->save_config('build/IFiles.pm');
+  $pkg->save_config('lib/B/Utils1/Install/IFiles.pm');
 }
 
 use ExtUtils::MakeMaker;

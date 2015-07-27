@@ -6,8 +6,8 @@ MANIFEST
 Makefile.PL
 README.md
 Utils1.xs
-build/IFiles.pm
 lib/B/Utils1.pm
+lib/B/Utils1/Install/IFiles.pm
 lib/B/Utils1/OP.pm
 ppport.h
 t/10use.t
