@@ -1,5 +1,9 @@
 Revision history for Perl extension B::Utils1.
 
+1.05 (rurban)
+
+   - Remove unrelated t/z_leaktrace.t
+
 1.04 (rurban)
 
    - Move build/IFiles.pm to lib/B/Utils1/Install/
